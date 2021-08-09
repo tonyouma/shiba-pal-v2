@@ -6,6 +6,7 @@ export const CHAT_ROOM_TYPES = {
     CONSUMER_TO_SUPPORT: "consumer-to-support",
 };
 
+
 const chatRoomSchema = new mongoose.Schema(
     {
         _id: {

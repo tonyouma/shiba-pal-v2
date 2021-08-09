@@ -1,9 +1,13 @@
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // models
 import UserModel from '../models/User.js';
+import {StatusCodes} from "http-status-codes";
 
-const SECRET_KEY = 'some-secret-key';
+const SECRET_KEY = process.env.APP_KEY;
 
 export const encode = async (req, res, next) => {
     try {
@@ -18,13 +22,13 @@ export const encode = async (req, res, next) => {
         req.authToken = authToken;
         next();
     } catch (error) {
-        return res.status(400).json({success: false, message: error.error});
+        return res.status(StatusCodes.BAD_REQUEST).json({success: false, message: error.error});
     }
 }
 
 export const decode = (req, res, next) => {
     if (!req.headers['authorization']) {
-        return res.status(400).json({success: false, message: 'No access token provided'});
+        return res.status(StatusCodes.BAD_REQUEST).json({success: false, message: 'No access token provided'});
     }
     const accessToken = req.headers.authorization.split(' ')[1];
     try {
@@ -34,6 +38,6 @@ export const decode = (req, res, next) => {
         return next();
     } catch (error) {
 
-        return res.status(401).json({success: false, message: error.message});
+        return res.status(StatusCodes.UNAUTHORIZED).json({success: false, message: error.message});
     }
 }

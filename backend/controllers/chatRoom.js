@@ -1,9 +1,13 @@
 import makeValidation from "@withvoid/make-validation";
+import {StatusCodes} from "http-status-codes";
 
 export default {
 
     initiate: async (req, res) => {
+
         try {
+            console.log(req.body.userIds);
+            console.log(req.body.type);
             const validation = makeValidation(types => ({
                 payload: req.body,
                 checks: {
@@ -14,15 +18,15 @@ export default {
                     type: {type: types.enum, options: {enum: CHAT_ROOM_TYPES}},
                 }
             }));
-            if (!validation.success) return res.status(400).json({...validation});
+            if (!validation.success) return res.status(StatusCodes.BAD_REQUEST).json({...validation});
 
             const {userIds, type} = req.body;
             const {userId: chatInitiator} = req;
             const allUserIds = [...userIds, chatInitiator];
             const chatRoom = await ChatRoomModel.initiateChat(allUserIds, type, chatInitiator);
-            return res.status(200).json({success: true, chatRoom});
+            return res.status(StatusCodes.OK).json({success: true, chatRoom});
         } catch (error) {
-            return res.status(500).json({success: false, error: error})
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success: false, error: error})
         }
     },
 
@@ -36,7 +40,7 @@ export default {
                     messageText: {type: types.string},
                 }
             }));
-            if (!validation.success) return res.status(400).json({...validation});
+            if (!validation.success) return res.status(StatusCodes.BAD_REQUEST).json({...validation});
 
             const messagePayload = {
                 messageText: req.body.messageText,
@@ -44,9 +48,9 @@ export default {
             const currentLoggedUser = req.userId;
             const post = await ChatMessageModel.createPostInChatRoom(roomId, messagePayload, currentLoggedUser);
             global.io.sockets.in(roomId).emit('new message', {message: post});
-            return res.status(200).json({success: true, post});
+            return res.status(StatusCodes.OK).json({success: true, post});
         } catch (error) {
-            return res.status(500).json({success: false, error: error})
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success: false, error: error})
         }
     },
     getConversationByRoomId: async (req, res) => {
@@ -54,7 +58,7 @@ export default {
             const {roomId} = req.params;
             const room = await ChatRoomModel.getChatRoomByRoomId(roomId)
             if (!room) {
-                return res.status(400).json({
+                return res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
                     message: 'No room exists for this id',
                 })
@@ -65,25 +69,25 @@ export default {
                 limit: parseInt(req.query.limit) || 10,
             };
             const conversation = await ChatMessageModel.getConversationByRoomId(roomId, options);
-            return res.status(200).json({
+            return res.status(StatusCodes.OK).json({
                 success: true,
                 conversation,
                 users,
             });
         } catch (error) {
-            return res.status(500).json({success: false, error});
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success: false, error});
         }
     },
     getRecentConversation: async (req, res) => {
     },
 
- 
+
     markConversationReadByRoomId: async (req, res) => {
         try {
             const {roomId} = req.params;
             const room = await ChatRoomModel.getChatRoomByRoomId(roomId)
             if (!room) {
-                return res.status(400).json({
+                return res.status(StatusCodes.BAD_REQUEST).json({
                     success: false,
                     message: 'No room exists for this id',
                 })
@@ -91,10 +95,10 @@ export default {
 
             const currentLoggedUser = req.userId;
             const result = await ChatMessageModel.markMessageRead(roomId, currentLoggedUser);
-            return res.status(200).json({success: true, data: result});
+            return res.status(StatusCodes.OK).json({success: true, data: result});
         } catch (error) {
             console.log(error);
-            return res.status(500).json({success: false, error});
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({success: false, error});
         }
     },
 
