@@ -1,5 +1,4 @@
 import http from "http";
-const dotenv = require('dotenv');
 
 import socketio from "socket.io";
 // socket configuration
@@ -9,6 +8,10 @@ import express from "express";
 import logger from "morgan";
 import cors from "cors";
 // routes
+
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import indexRouter from "../routes/index.js";
 import userRouter from "../routes/user.js";

@@ -1,6 +1,12 @@
 import mongoose from 'mongoose'
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const CONNECTION_URL = process.env.MONGODB_URL;
+
+
+
 
 mongoose.connect(CONNECTION_URL, {
     useNewUrlParser: true,
