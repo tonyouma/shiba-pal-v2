@@ -62,7 +62,11 @@ userSchema.statics.createUser = async function (
 }
 userSchema.statics.deleteByUserById = async function (id) {
     try {
-        return await this.remove({_id: id});
+
+        const user = await this.findOne({_id: id});
+        if (!user) throw ({error: 'No user with this id found'});
+
+        return await this.deleteOne({_id: id});
     } catch (error) {
         throw error;
     }
